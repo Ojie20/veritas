@@ -73,7 +73,27 @@ const AppState = {
     // ]
     
     // 🚨 YOUR CODE STARTS HERE:
-    
+    // Wallet connection properties
+    isWalletConnected: false,
+    currentAccount: null,
+    currentNetwork: null,
+    // Voting properties
+    selectedOption: null,
+    hasUserVoted: false,
+    currentPoll: null,
+    // UI state properties
+    isLoading: false,
+    isTransactionInProgress: false,
+    // Configurtion Properties
+    pollTitle: "Who is your choice candidate",
+    pollOptions: [
+        {id: 0, name: "Kanye West", votes: 0},
+        {id: 1, name: "Donald Trump", votes: 0},
+        {id: 2, name: "Optimus Prime", votes: 0},
+        {id: 3, name: "Socrates", votes: 0},
+        {id: 4, name: "Peter Parker", votes: 0},
+    ]
+
     
     // 🚨 YOUR CODE ENDS HERE
 };
@@ -105,7 +125,16 @@ const CONFIG = {
     // - EXPLORER_URLS: object with network IDs as keys
     
     // 🚨 YOUR CODE STARTS HERE:
-    
+    CHAIN_ID: '0xaa36a7',
+    CHAIN_NAME: 'Sepolia Testnet',
+    RPC_URL: 'https://sepolia.infura.io/v3/',
+
+    CONTRACT_ADDRESS: null, 
+
+    TRANSACTION_TIMEOUT: 30000, // 30 seconds
+    POLL_REFRESH_INTERVAL: 10000, // 10 seconds
+
+    EXPLORER_URLS: {}
     
     // 🚨 YOUR CODE ENDS HERE
 };
@@ -135,7 +164,8 @@ function showErrorMessage(message) {
     // HINT: console.error('❌ Error:', message);
     
     // 🚨 YOUR CODE STARTS HERE:
-    
+    alert('❌ Error: ' + message);
+    console.error('❌ Error:', message);
     
     // 🚨 YOUR CODE ENDS HERE
 }
@@ -148,7 +178,8 @@ function showSuccessMessage(message) {
     // 3. Log to console for debugging
     
     // 🚨 YOUR CODE STARTS HERE:
-    
+    alert('✅ Success: ' + message);
+    console.log('✅ Success:', message);
     
     // 🚨 YOUR CODE ENDS HERE
 }
@@ -164,7 +195,10 @@ function formatWalletAddress(address) {
     // HINT: address.length gives you the total length
     
     // 🚨 YOUR CODE STARTS HERE:
-    
+    if (!address) {
+        return 'Not Connected';
+    }
+    return address.substring(0, 6) + '...' + address.substring(address.length - 4, address.length);
     
     // 🚨 YOUR CODE ENDS HERE
 }
@@ -195,7 +229,9 @@ function calculateTotalVotes() {
     //       }, 0);
     
     // 🚨 YOUR CODE STARTS HERE:
-    
+    return AppState.pollOptions.reduce((total, option) => {
+        return total + option.votes;
+    }, 0);
     
     // 🚨 YOUR CODE ENDS HERE
 }
@@ -210,7 +246,8 @@ function checkUserVotingStatus() {
     // HINT: Add a console.log to show the status
     
     // 🚨 YOUR CODE STARTS HERE:
-    
+    AppState.hasUserVoted = false;
+    console.log('User voting status checked:', AppState.hasUserVoted);
     
     // 🚨 YOUR CODE ENDS HERE
 }
@@ -241,7 +278,8 @@ function updateTotalVotesDisplay() {
     
     // 🚨 YOUR CODE STARTS HERE:
     
-    
+    const element = document.getElementById('total-votes');
+    element.textContent = `Total Votes: ${calculateTotalVotes()}`;
     // 🚨 YOUR CODE ENDS HERE
 }
 
