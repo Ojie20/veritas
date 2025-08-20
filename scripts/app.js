@@ -74,7 +74,7 @@ const AppState = {
     
     // 🚨 YOUR CODE STARTS HERE:
     // Wallet connection properties
-    isWalletConnected: false,
+    isWalletConnected: true,
     currentAccount: null,
     currentNetwork: null,
     // Voting properties
@@ -165,7 +165,7 @@ function showErrorMessage(message) {
     
     // 🚨 YOUR CODE STARTS HERE:
     alert('❌ Error: ' + message);
-    console.error('❌ Error:', message);
+    // console.error('❌ Error:', message);
     
     // 🚨 YOUR CODE ENDS HERE
 }
@@ -428,39 +428,77 @@ function createVotingOptionElement(option, index) {
     console.log('📝 TODO: Complete this function in Module 2');
     console.log('📖 See STUDENT-GUIDE.md Module 2 for instructions');
     
-    // Placeholder return to prevent errors
-    const placeholder = document.createElement('div');
-    placeholder.textContent = 'TODO: Complete in Module 2';
-    placeholder.style.padding = '20px';
-    placeholder.style.border = '2px dashed #ccc';
-    placeholder.style.margin = '10px';
-    placeholder.style.textAlign = 'center';
-    return placeholder;
+    
+    const votingOption = document.createElement('div');
+    votingOption.className = 'voting-option';
+    votingOption.setAttribute('data-option-id', index);
+    votingOption.innerHTML = `
+    <div class="vote-option-header">
+            <span class="option-name">${option.name}</span>
+            <span class="vote-count">${option.votes} votes</span>
+        </div>
+        <div class="vote-progress">
+            <div class="vote-progress-fill" style="width: 0%"></div>
+        </div>
+        <div class="vote-percentage">0.0%</div>
+    `
+    return votingOption;
 }
 
 // TODO 2.2: Complete the createVotingOptions function (Module 2)
 function createVotingOptions() {
     // STUDENT TASK (Module 2): Generate all voting option elements
-    console.log('📝 TODO: Complete this function in Module 2');
-    
-    // Placeholder implementation
-    const container = document.getElementById('voting-options');
-    if (container) {
-        container.innerHTML = '<p style="text-align: center; padding: 20px;">📚 Complete Module 2 to see voting options here!</p>';
-    }
+    AppState.pollOptions.forEach((option) => {
+        const votingOptionElement = createVotingOptionElement(option, option.id);
+        const votingOptions = document.getElementById('voting-options');
+        if (votingOptions){
+            votingOptions.appendChild(votingOptionElement);
+        }
+        votingOptionElement.addEventListener('click', () =>{
+            selectVotingOption(option.id);
+            updateVotingOptionsDisplay();
+        })
+    })
 }
 
 // TODO 2.3: Complete the selectVotingOption function (Module 2)
 function selectVotingOption(optionId) {
     // STUDENT TASK (Module 2): Handle voting option selection
-    console.log('📝 TODO: Complete this function in Module 2');
-    console.log('🎯 Option selected:', optionId);
+    // console.log('📝 TODO: Complete this function in Module 2');
+    // console.log('🎯 Option selected:', optionId);
+    if( !AppState.isWalletConnected){
+        showErrorMessage('Please connect your wallet first');
+        return;
+    }
+    if (AppState.hasUserVoted) {
+        showErrorMessage('You have already voted');
+        return;
+    }
+    AppState.selectedOption = optionId;
+    let option = AppState.pollOptions.find(option => option.id === optionId);
+    console.log('🎯 Option selected:', option);
+    option.votes += 1; // Increment the vote count for the selected option
+
+    AppState.hasUserVoted = true;
 }
 
 // TODO 2.4: Complete the updateVotingOptionsDisplay function (Module 2)
 function updateVotingOptionsDisplay() {
     // STUDENT TASK (Module 2): Update visual state of voting options
-    console.log('📝 TODO: Complete this function in Module 2');
+    document.querySelectorAll('.voting-option').forEach(option =>{
+        const optionId = parseInt(option.getAttribute('data-option-id'));
+        let optionObject = AppState.pollOptions.find(option => option.id === optionId);
+        if (optionId === AppState.selectedOption) {
+            option.classList.add('selected');
+        } else {
+            option.classList.remove('selected');
+        }
+        option.querySelector('.vote-count').textContent = `${optionObject.votes} votes`;
+        const percentage = (optionObject.votes / calculateTotalVotes() * 100);
+        option.querySelector('.vote-progress-fill').style.width = `${percentage}%`;
+        option.querySelector('.vote-percentage').textContent = `${percentage}%`
+    }) 
+    updateTotalVotesDisplay();
 }
 
 // =============================================================================
